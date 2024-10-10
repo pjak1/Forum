@@ -1,0 +1,41 @@
+/* styles.css */
+
+/* Block: form */
+.form {
+    max-width: 400px;  /* Adjust width as necessary */
+    margin: auto;      /* Center the form */
+}
+
+/* Block: form-item (Element) */
+.form__item {
+    display: flex;
+    flex-direction: column;  /* Stack label and input vertically */
+    margin-bottom: 15px;     /* Space between form items */
+}
+
+/* Label for form elements (Modifier) */
+.form__label {
+    margin-bottom: 5px;  /* Space between label and input */
+}
+
+/* Input fields (Element) */
+.form__input {
+    padding: 10px;       /* Input padding */
+    border: 1px solid #ccc;  /* Input border */
+    border-radius: 4px;  /* Rounded corners */
+    width: 100%;         /* Full width */
+}
+
+/* Button (Modifier) */
+.form__button {
+    margin-top: 15px;    /* Space above button */
+    padding: 10px 15px;  /* Button padding */
+    border: none;        /* No border */
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;        /* Text color */
+    cursor: pointer;     /* Pointer cursor on hover */
+}
+
+.alert {
+    color: red; /* Alert text color */
+}

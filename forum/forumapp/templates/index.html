@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Forum - Latest Discussions{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Welcome to the Forum</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Latest Discussions</h5>
+        <ul class="list-group">
+            {% for topic in topics %}
+            <li class="list-group-item">
+                <a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a>
+                <span class="badge bg-secondary float-end">{{ topic.replies.count }} Replies</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

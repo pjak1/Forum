@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Topic{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Create a New Topic</h5>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="topicTitle" class="form-label">Topic Title</label>
+                <input type="text" class="form-control" id="topicTitle" name="title" placeholder="Enter title" required>
+            </div>
+            <div class="mb-3">
+                <label for="topicCategory" class="form-label">Category</label>
+                <select class="form-select" id="topicCategory" name="category" required>
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="topicContent" class="form-label">Content</label>
+                <textarea class="form-control" id="topicContent" name="content" rows="5" placeholder="Write your message" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post Topic</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

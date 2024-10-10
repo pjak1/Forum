@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <label for="category-select" class="form-label">Select a category:</label>
+        <select class="form-select" id="category-select" onchange="location = this.value;">
+            {% for cat in categories %}
+                <option value="{% url 'category_detail' cat.id %}" {% if cat.id == category.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <h1>{{ category.name }}</h1>
+    <p>{{ category.description }}</p>
+
+    <h5>Topics in {{ category.name }}</h5>
+    <ul class="list-group mb-3">
+        {% for topic in topics %}
+        <li class="list-group-item">
+            <a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a>
+            <span class="badge bg-secondary float-end">{{ topic.replies.count }} Replies</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No topics in this category.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

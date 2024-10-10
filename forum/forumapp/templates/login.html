@@ -1,0 +1,29 @@
+<!-- log_in.html -->
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+    <h2 class="form__title text-center">Log In</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        <div class="form__item">
+            <label for="{{ form.username.id_for_label }}" class="form__label">{{ form.username.label }}</label>
+            {{ form.username|add_class:"form__input" }}  <!-- Add BEM class -->
+            {% if form.username.errors %}
+                <div class="alert">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="form__item">
+            <label for="{{ form.password.id_for_label }}" class="form__label">{{ form.password.label }}</label>
+            {{ form.password|add_class:"form__input" }}  <!-- Add BEM class -->
+            {% if form.password.errors %}
+                <div class="alert">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="form__item" style="text-align: right;">
+            <button type="submit" class="form__button">Log In</button>
+        </div>
+    </form>
+    <p>Don't have an account? <a href="{% url 'sign_up' %}">Sign up</a></p>
+{% endblock %}

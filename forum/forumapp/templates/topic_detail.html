@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ topic.title }}{% endblock %}
+
+{% block content %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ topic.title }}</h5>
+            <p class="card-text">{{ topic.content }}</p>
+            <p class="text-muted">Posted by {{ topic.author }} on {{ topic.created_at }}</p>
+        </div>
+    </div>
+
+    <h5>Replies</h5>
+    <ul class="list-group mb-3">
+        {% for reply in topic.replies.all %}
+        <li class="list-group-item">
+            <p>{{ reply.content }}</p>
+            <p class="text-muted">Posted by {{ reply.author }} on {{ reply.created_at }}</p>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No replies yet.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
