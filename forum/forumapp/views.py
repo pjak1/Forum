@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils.translation import gettext
 from .models import Topic, Category
 from .forms import SignUpForm
 
@@ -9,7 +11,9 @@ def index(request):
     topics = Topic.objects.all()
     return render(request, 'index.html', {'topics': topics})
 
-def new_topic(request):
+
+def new_topic(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
     if request.method == 'POST':
         # Handle topic creation form submission here
         pass
@@ -45,7 +49,7 @@ def sign_up(request):
     return render(request, 'sign_up.html', {'form': form})
 
 
-def login(request):
+def user_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -53,8 +57,19 @@ def login(request):
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user)  # Log in the user
-                return redirect('index')  # Redirect to the home page after successful login
+                login(request, user)
+                return redirect('index')  # Redirect to a homepage after successful login
+            else:
+                messages.error(request, gettext("Invalid username or password."))  # Add error message
+        else:
+            messages.error(request, gettext("Invalid username or password."))  # Add error message for invalid form
+
     else:
         form = AuthenticationForm()
+
     return render(request, 'login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('index')

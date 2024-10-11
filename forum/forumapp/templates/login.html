@@ -1,29 +1,37 @@
-<!-- log_in.html -->
 {% extends 'base.html' %}
 {% load custom_filters %}
-{% block title %}Log In{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Log In" %}{% endblock %}
 
 {% block content %}
-    <h2 class="form__title text-center">Log In</h2>
+    <h2 class="form__title text-center">{% trans "Log In" %}</h2>
     <form method="post" class="form">
         {% csrf_token %}
         <div class="form__item">
             <label for="{{ form.username.id_for_label }}" class="form__label">{{ form.username.label }}</label>
-            {{ form.username|add_class:"form__input" }}  <!-- Add BEM class -->
+            {{ form.username|add_class:"form__input" }}
             {% if form.username.errors %}
                 <div class="alert">{{ form.username.errors }}</div>
             {% endif %}
         </div>
         <div class="form__item">
             <label for="{{ form.password.id_for_label }}" class="form__label">{{ form.password.label }}</label>
-            {{ form.password|add_class:"form__input" }}  <!-- Add BEM class -->
+            {{ form.password|add_class:"form__input" }}
             {% if form.password.errors %}
                 <div class="alert">{{ form.password.errors }}</div>
             {% endif %}
         </div>
         <div class="form__item" style="text-align: right;">
-            <button type="submit" class="form__button">Log In</button>
+            <button type="submit" class="form__button">{% trans "Log In" %}</button>
         </div>
     </form>
-    <p>Don't have an account? <a href="{% url 'sign_up' %}">Sign up</a></p>
+    {% if messages %}
+        <div class="alert text-center">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <p>{% trans "Don't have an account?" %} <a href="{% url 'sign_up' %}">{% trans "Sign up" %}</a></p>
 {% endblock %}

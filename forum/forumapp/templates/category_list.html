@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Categories{% endblock %}
+{% block title %}{% trans "Categories" %}{% endblock %}
 
 {% block content %}
-    <h1>Categories</h1>
+    <h1>{% trans "Categories" %}</h1>
     <ul class="list-group">
         {% for category in categories %}
         <li class="list-group-item">
@@ -11,7 +12,7 @@
             <p>{{ category.description }}</p>
         </li>
         {% empty %}
-        <li class="list-group-item">No categories found.</li>
+        <li class="list-group-item">{% trans "No categories found." %}</li>
         {% endfor %}
     </ul>
 {% endblock %}
