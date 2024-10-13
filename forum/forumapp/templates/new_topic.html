@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Create New Topic" %}{% endblock %}
-
 {% block content %}
 <div class="card mb-3">
     <div class="card-body">
@@ -11,20 +9,24 @@
             {% csrf_token %}
             <div class="mb-3">
                 <label for="topicTitle" class="form-label">{% trans "Topic Title" %}</label>
-                <input type="text" class="form-control" id="topicTitle" name="title" placeholder={%trans "Enter title"%} required>
+                <input type="text" class="form-control" id="topicTitle" name="title" placeholder="{% trans "Enter title" %}" required>
             </div>
             <div class="mb-3">
                 <label for="topicCategory" class="form-label">{% trans "Category" %}</label>
                 <select class="form-select" id="topicCategory" name="category" required>
                     <option value="">{% trans "Select category" %}</option>
                     {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% if category.name != 'My Topics' %}
+                            <option value="{{ category.id }}">
+                                {{ category.name }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
-                </select>
+                </select>                
             </div>
             <div class="mb-3">
                 <label for="topicContent" class="form-label">{% trans "Content" %}</label>
-                <textarea class="form-control" id="topicContent" name="content" rows="5" placeholder={%trans "Write your message" %} required></textarea>
+                <textarea class="form-control" id="topicContent" name="content" rows="5" placeholder="{% trans "Write your message" %}" required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">{% trans "Post Topic" %}</button>
         </form>

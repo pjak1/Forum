@@ -55,6 +55,11 @@
     </nav>
 
     <div class="container mt-4">
+        {% if request.path != '/' %}
+            <a href="javascript:history.back()" class="back_arrow">
+                <i class="bi bi-arrow-left-circle" style="font-size: 30px;"></i>
+            </a>
+        {% endif %}
         {% block content %}
         {% endblock %}
     </div>

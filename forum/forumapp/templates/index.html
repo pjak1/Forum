@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Forum - Latest Discussions" %}{% endblock %}
-
 {% block content %}
 <h1 class="mb-4">{% trans "Welcome to the Forum" %}</h1>
 
@@ -12,7 +10,7 @@
         <ul class="list-group">
             {% for topic in topics %}
             <li class="list-group-item">
-                <a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a>
+                <a href="{% url 'topic_detail' slug=topic.slug %}">{{ topic.title }}</a>
                 <span class="badge bg-secondary float-end">{{ topic.replies.count }} {% trans "Replies" %}</span>
             </li>
             {% endfor %}

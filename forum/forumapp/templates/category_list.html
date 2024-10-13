@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Categories" %}{% endblock %}
-
 {% block content %}
     <h1>{% trans "Categories" %}</h1>
     <ul class="list-group">
         {% for category in categories %}
         <li class="list-group-item">
-            <h5><a href="{% url 'category_detail' category.id %}">{{ category.name }}</a></h5>
+            <h5><a href="{% url 'category_detail' category.slug %}">{{ category.name }}</a></h5>
             <p>{{ category.description }}</p>
         </li>
         {% empty %}

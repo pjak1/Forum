@@ -112,7 +112,7 @@ LANGUAGES = [
     ('en', 'English'),
 ]
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Prague'
 
 USE_I18N = True
 

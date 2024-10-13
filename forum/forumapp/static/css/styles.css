@@ -45,3 +45,9 @@
    color: green;
    margin-left: 0.25em;
 }
+
+.back_arrow {
+    position: relative;
+    z-index: 2;
+
+}

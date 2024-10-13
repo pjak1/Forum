@@ -2,9 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext
 from .models import Topic, Category
-from .forms import SignUpForm
+from .forms import SignUpForm, NewTopicForm
 
 
 def index(request):
@@ -12,24 +13,50 @@ def index(request):
     return render(request, 'index.html', {'topics': topics})
 
 
-def new_topic(request, category_id):
-    category = get_object_or_404(Category, id=category_id)
+@login_required
+def new_topic(request):
     if request.method == 'POST':
-        # Handle topic creation form submission here
-        pass
-    categories = Category.objects.all()
-    return render(request, 'new_topic.html', {'categories': categories})
+        category_id = request.POST.get('category')  # Získání id kategorie z POST
+        category = get_object_or_404(Category, id=category_id)  # Najdi kategorii podle id
+        form = NewTopicForm(request.POST)
+
+        if category.name != 'MyTopics':  # Ověř, že to není 'MyTopics'
+            if form.is_valid():
+                topic = form.save(commit=False)  # commit=False to not save immediately
+                topic.category = category  # Nastav kategorii správně
+                topic.author = request.user
+                topic.save()
+                return redirect('category_detail', slug=category.slug)
+            else:
+                # Pokud je formulář neplatný, zobraz formulář znovu
+                categories = Category.objects.all()
+                return render(request, 'new_topic.html', {'categories': categories, 'form': form})
+        else:
+            # Ošetři neplatnou kategorii 'MyTopics'
+            categories = Category.objects.all()
+            return render(request, 'new_topic.html', {'categories': categories, 'form': form, 'error': 'Invalid category selected'})
+    else:
+        categories = Category.objects.all()
+        form = NewTopicForm()
+        return render(request, 'new_topic.html', {'categories': categories, 'form': form})
 
 
-def topic_detail(request, id):
-    topic = get_object_or_404(Topic, id=id)
+
+def topic_detail(request, slug):
+    topic = get_object_or_404(Topic, slug=slug)
     return render(request, 'topic_detail.html', {'topic': topic})
 
 
-def category_detail(request, id):
-    category = get_object_or_404(Category, id=id)
+def category_detail(request, slug):
+    category = get_object_or_404(Category, slug=slug)
     categories = Category.objects.all()
-    topics = category.topics.all()  # Get all topics associated with the category
+
+    if category.name == 'My Topics':
+        # Show only topics created by the logged-in user
+        topics = Topic.objects.filter(author=request.user)
+    else:
+        # Show all topics for the category
+        topics = category.topics.all()
     return render(request, 'category_detail.html', {'category': category, 'topics': topics, 'categories': categories})
 
 
@@ -60,9 +87,9 @@ def user_login(request):
                 login(request, user)
                 return redirect('index')  # Redirect to a homepage after successful login
             else:
-                messages.error(request, gettext("Invalid username or password."))  # Add error message
+                messages.error(request, gettext("Invalid username or password."))
         else:
-            messages.error(request, gettext("Invalid username or password."))  # Add error message for invalid form
+            messages.error(request, gettext("Invalid username or password."))
 
     else:
         form = AuthenticationForm()
