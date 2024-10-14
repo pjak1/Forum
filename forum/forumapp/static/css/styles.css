@@ -51,3 +51,12 @@
     z-index: 2;
 
 }
+
+.active-border {
+    border-color: #007bff; /* Change this to your desired active border color */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Optional: add a shadow for emphasis */
+}
+
+textarea.form-control:focus {
+    box-shadow: none; /* Remove any box shadow that may appear on focus */
+}

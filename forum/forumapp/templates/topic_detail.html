@@ -9,16 +9,22 @@
             <p class="text-muted">{% trans "Posted by" %} {{ topic.author }} {% trans "on" %} {{ topic.created_at }}</p>
         </div>
     </div>
-
-    <h5>{% trans "Replies" %}</h5>
-    <ul class="list-group mb-3">
+    <div class="d-flex align-items-end">
+        <h5>{% trans "Replies" %}</h5>
+        <a id="reply_button" href="#" title="{% trans 'Create new reply' %}">
+            <i class="add_button bi bi-plus-lg"></i>
+        </a>
+    </div>
+    <div id="reply_div" data="{{topic.slug}}">
+    </div>
+    <ul class="list-group mb-3" id="replies">
         {% for reply in topic.replies.all %}
         <li class="list-group-item">
             <p>{{ reply.content }}</p>
             <p class="text-muted">{% trans "Posted by" %} {{ reply.author }} on {{ reply.created_at }}</p>
         </li>
         {% empty %}
-        <li class="list-group-item">{% trans "No replies yet." %}</li>
+        <li id="no_replies" class="list-group-item">{% trans "No replies yet." %}</li>
         {% endfor %}
     </ul>
 {% endblock %}

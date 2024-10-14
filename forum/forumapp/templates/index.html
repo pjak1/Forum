@@ -9,9 +9,12 @@
         <h5 class="card-title">{% trans "Latest Discussions" %}</h5>
         <ul class="list-group">
             {% for topic in topics %}
-            <li class="list-group-item">
-                <a href="{% url 'topic_detail' slug=topic.slug %}">{{ topic.title }}</a>
-                <span class="badge bg-secondary float-end">{{ topic.replies.count }} {% trans "Replies" %}</span>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'topic_detail' topic.slug %}">{{ topic.title }}</a>
+                <div class="d-flex flex-column align-items-end">
+                    <p class="text-muted mb-0">{% trans "Posted by" %} {{ topic.author }} {{topic.created_at}}</p>
+                    <span class="badge bg-secondary">{{ topic.replies.count }} {% trans "Replies" %}</span>
+                </div>
             </li>
             {% endfor %}
         </ul>

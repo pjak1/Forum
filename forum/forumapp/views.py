@@ -1,10 +1,15 @@
+import json
+
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.utils import formats
 from django.utils.translation import gettext
-from .models import Topic, Category
+from .models import Topic, Category, Reply
 from .forms import SignUpForm, NewTopicForm
 
 
@@ -41,10 +46,38 @@ def new_topic(request):
         return render(request, 'new_topic.html', {'categories': categories, 'form': form})
 
 
-
 def topic_detail(request, slug):
     topic = get_object_or_404(Topic, slug=slug)
     return render(request, 'topic_detail.html', {'topic': topic})
+
+
+@login_required
+@require_POST
+def new_reply(request):
+    try:
+        # Load the JSON data from the request body
+        data = json.loads(request.body)
+        reply_text = data.get('reply')
+
+        # Retrieve topic slug
+        topic_slug = data.get('topic_slug')
+
+        author= request.user
+
+        # Fetch the related Topic instance
+        topic = Topic.objects.get(slug=topic_slug)
+
+        # Create and save the new reply
+        reply = Reply(content=reply_text, topic=topic, 
+                                    author=author)
+        reply.save()
+        formatted_time = formats.date_format(reply.created_at, "DATETIME_FORMAT")
+
+        return JsonResponse({'status': 'success', 'time': formatted_time})
+    except Topic.DoesNotExist as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 def category_detail(request, slug):
