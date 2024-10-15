@@ -13,4 +13,5 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
     path('new-reply/', views.new_reply, name='new_reply'),
+    path('load-objects/', views.load_objects, name='load_objects'),
 ]

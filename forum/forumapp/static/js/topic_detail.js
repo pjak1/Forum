@@ -1,4 +1,10 @@
-let isReplying = false; // Flag to track submission state
+var isReplying = false; // Flag to track submission state
+var page = 1;  // current page
+var per_page = 7;
+var model = "Reply";
+var isLoading = false;  // Stav načítání
+const responseSection = document.getElementById('reply_div');
+const slug = responseSection.getAttribute("data");
 
 function getCookie(name) {
     let cookieValue = null;
@@ -32,9 +38,8 @@ function createReply(text, author, time) {
     return reply;
 }
 
-function handleReply(textarea, responseSection, wrapper) {
+function handleReply(textarea, wrapper) {
     const content = textarea.value;
-    const slug = responseSection.getAttribute("data");
 
     if (content.trim() && !isReplying) { // Check if submission is not in progress
         isReplying = true; // Set the flag to true
@@ -87,8 +92,6 @@ function handleReply(textarea, responseSection, wrapper) {
 }
 
 function createReplyBox() {
-    // Find the element where we want to insert the toolbar and textarea
-    const responseSection = document.getElementById('reply_div');
 
     // Create a wrapper div with a border
     const wrapper = document.createElement('div');
@@ -135,7 +138,7 @@ function createReplyBox() {
 
     // Function for the action on the Reply button
     replyButton.addEventListener('click', function() {
-       handleReply(textarea, responseSection, wrapper);
+       handleReply(textarea, wrapper);
     });
     // Add event listeners to apply active styles to the wrapper
     textarea.addEventListener('focus', function() {
@@ -147,6 +150,63 @@ function createReplyBox() {
     });
 }
 
+// Funkce pro načítání objektů pomocí POST AJAX
+function loadObjects(objectList, filters = {}, createObject) {
+    if (isLoading) return;  // Zabránění opakovanému načítání při probíhajícím požadavku
+    isLoading = true;
+
+    // Připravte tělo požadavku včetně volitelných filtračních parametrů
+    let body = `page=${page}&per_page=${per_page}&model=${model}`;
+    for (const [key, value] of Object.entries(filters)) {
+        body += `&${key}=${value}`;
+    }
+
+    fetch('/load-objects/?format_function=datetime_format', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')  // Přidání CSRF tokenu do hlaviček požadavku
+        },
+        body: body  // Odeslání těla požadavku
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Zpracování získaných objektů
+        data.objects.forEach(obj => {
+            addObject(objectList, () => {return createObject(obj)});
+        });
+
+        if (data.has_next) {
+            page++;  // Pokud existuje další stránka, zvýšíme číslo stránky
+        } else {
+            window.removeEventListener('scroll', handleScroll);  // Pokud nejsou další objekty, odstraníme událost scrollování
+        }
+        isLoading = false;  // Resetování stavu načítání
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        isLoading = false;  // V případě chyby resetujeme stav
+    });
+}
+
+// Funkce pro zjištění, zda uživatel doscrolloval na konec stránky
+function handleScroll() {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !isLoading) {
+       loadReplies();
+    }
+}
+
+function loadReplies() {
+    filters = {"topic__slug": slug};
+    loadObjects(document.getElementById('replies'), filters, (object) => {
+            return createReply(object.content, object.author_name, object.created_at);
+        });
+}
+
+function addObject(objectList, createObject) {
+    const object = createObject();
+    objectList.appendChild(object);
+}
 
 var reply_button = document.getElementById("reply_button");
 
@@ -155,3 +215,8 @@ reply_button.addEventListener("click", () => {
         createReplyBox();
     }
 });
+
+window.addEventListener('scroll', handleScroll);
+
+// Načti první sadu objektů, když je stránka načtena
+document.addEventListener('DOMContentLoaded', loadReplies);
