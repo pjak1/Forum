@@ -28,3 +28,9 @@ class NewTopicForm(forms.ModelForm):
         self.fields['category'].widget.attrs.update({'class': 'form-select'})
         self.fields['title'].widget.attrs.update({'class': 'form-control'})
         self.fields['content'].widget.attrs.update({'class': 'form-control'})
+
+
+
+class NewReplyForm(forms.Form):
+    reply = forms.CharField(max_length=500)
+    topic_slug = forms.SlugField()
