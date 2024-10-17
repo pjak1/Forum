@@ -161,7 +161,7 @@ function loadObjects(objectList, filters = {}, createObject) {
         body += `&${key}=${value}`;
     }
 
-    fetch('/load-objects/?format_function=datetime_format', {
+    fetch('/load-objects/?format_function=datetime_format&format_args[]=created_at&annotate_author_name=author__username', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -210,12 +210,14 @@ function addObject(objectList, createObject) {
 
 var reply_button = document.getElementById("reply_button");
 
-reply_button.addEventListener("click", () => {
-    if (!document.getElementById("reply_wrapper")){
-        createReplyBox();
-    }
-});
-
+if (reply_button) {
+    reply_button.addEventListener("click", () => {
+        if (!document.getElementById("reply_wrapper")){
+            createReplyBox();
+        }
+    });
+    
+}
 window.addEventListener('scroll', handleScroll);
 
 // Načti první sadu objektů, když je stránka načtena
