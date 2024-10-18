@@ -41,8 +41,10 @@ class Reply(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='replies')
     content = models.TextField()
     created_at = models.DateTimeField()
-    updated_at = models.DateTimeField(auto_now=True)  # Automatically update the timestamp on edits
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')  # Support threaded replies
+    # Automatically update the timestamp on edits
+    updated_at = models.DateTimeField(auto_now=True)
+    # Support threaded replies
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
     slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):

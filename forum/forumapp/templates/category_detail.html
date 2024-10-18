@@ -23,7 +23,7 @@
     <p>{{ category.description }}</p>
 
     <h5>{% trans "Topics in" %} {{ category.name }}</h5>
-    <ul class="list-group mb-3">
+    <ul id="topics" class="list-group mb-3">
         {% for topic in topics %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <a href="{% url 'topic_detail' topic.slug %}">{{ topic.title }}</a>

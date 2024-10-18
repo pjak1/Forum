@@ -20,13 +20,5 @@
     <div id="reply_div" data="{{topic.slug}}">
     </div>
     <ul class="list-group mb-3" id="replies">
-        {% comment %} {% for reply in topic.replies.all %}
-        <li class="list-group-item">
-            <p>{{ reply.content }}</p>
-            <p class="text-muted">{% trans "Posted by" %} {{ reply.author }} on {{ reply.created_at }}</p>
-        </li>
-        {% empty %}
-        <li id="no_replies" class="list-group-item">{% trans "No replies yet." %}</li>
-        {% endfor %} {% endcomment %}
     </ul>
 {% endblock %}

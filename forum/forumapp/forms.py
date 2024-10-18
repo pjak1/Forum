@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from .models import Topic
 
 class SignUpForm(UserCreationForm):
@@ -28,7 +27,6 @@ class NewTopicForm(forms.ModelForm):
         self.fields['category'].widget.attrs.update({'class': 'form-select'})
         self.fields['title'].widget.attrs.update({'class': 'form-control'})
         self.fields['content'].widget.attrs.update({'class': 'form-control'})
-
 
 
 class NewReplyForm(forms.Form):

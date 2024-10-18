@@ -2,7 +2,7 @@
 
 /* Block: form */
 .form {
-    max-width: 400px;  /* Adjust width as necessary */
+    max-width: 400px;
     margin: auto;      /* Center the form */
 }
 
@@ -53,8 +53,8 @@
 }
 
 .active-border {
-    border-color: #007bff; /* Change this to your desired active border color */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Optional: add a shadow for emphasis */
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 textarea.form-control:focus {
