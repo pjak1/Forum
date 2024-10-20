@@ -1,14 +1,20 @@
-This is work in progress personal project
+Forum Project (Work in Progress)
+================================
 
-How to run
-	Use Python 3.12
-	Install requirements from requirements.txt with pip
-	From forum directory run: python manage.py runserver
+This is a personal project currently under development.
+
+How to Run the Project
+----------------------
+1. Ensure you're using Python 3.12.
+2. Install dependencies with:
+   pip install -r requirements.txt
+3. Navigate to the 'forum' directory and start the development server:
+   python manage.py runserver
 
 
-Database users:
-	username: admin
-	password: SuperUser123
-	
-	username: Joe
-	password: SecretPassword4
+Database Users
+--------------
+| Username | Password        |
+|----------|-----------------|
+| admin    | SuperUser123     |
+| Joe      | SecretPassword4  |
