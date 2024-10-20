@@ -1,6 +1,5 @@
 import json
 
-from typing import Any, Callable, Dict, List, Optional, Tuple
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.apps import apps
 from django.core.paginator import Paginator
@@ -12,83 +11,24 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import formats
 from django.utils.translation import gettext
-from django.forms.models import model_to_dict
-from django.db.models import F, Model, Count
 
 from .models import Topic, Category, Reply
 from .forms import SignUpForm, NewTopicForm
+from .helpers import (
+    get_format_function,
+    validate_filter_params,
+    validate_annotations,
+    get_filter_params,
+    validate_page_and_per_page,
+    get_model,
+    fetch_objects,
+    serialize_objects,
+    create_response_data
+)
 
-ALLOWED_MODELS = ['Reply', 'Category']
-ALLOWED_FILTER_PARAMS = ['topic__slug']
-ALLOWED_ANNOTATIONS = ['author_name', 'replies_count']
-
-
-def format_date_field(obj_dict: Dict[str, Any], obj: Model, date_field_name: str) -> None:
-    """
-    Formats a date field of an object into a human-readable format.
-    """
-    obj_dict[date_field_name] = formats.date_format(obj.created_at, format='DATETIME_FORMAT', use_l10n=True)
-
-
-def add_annotated_fields_to_obj_attrs(obj_dict: Dict[str, Any], obj: Model, annotations: List[str]) -> None:
-    """
-    Adds annotated fields to the dictionary representation of an object.
-    """
-    for annotation in annotations:
-        obj_dict[annotation] = getattr(obj, annotation)
-
-
-def get_format_function(request: HttpRequest) -> Tuple[Optional[Callable], List[Any]]:
-    """
-    Retrieves the appropriate format function and its arguments from the request.
-    """
-    format_function_name = request.GET.get('format_function')
-    format_args = request.GET.getlist('format_args[]', [])
-
-    available_format_functions = {
-        'datetime_format': format_date_field,
-    }
-
-    return available_format_functions.get(format_function_name), format_args
-
-
-def validate_filter_params(params: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Validates the filter parameters and only allows safe parameters.
-    """
-    valid_params = {}
-    for key, value in params.items():
-        if key in ALLOWED_FILTER_PARAMS:
-            valid_params[key] = value
-    return valid_params
-
-
-def validate_annotations(params: Dict[str, Any]) -> Dict[str, F]:
-    """
-    Validates annotations, ensuring only allowed annotations are used.
-    """
-    valid_annotations = {}
-    for key, value in params.items():
-        if key.startswith('annotate_'):
-            annotation_key = key[len('annotate_'):]
-            if annotation_key in ALLOWED_ANNOTATIONS:
-                valid_annotations[annotation_key] = F(value)
-    return valid_annotations
-
-
-def safe_model_to_dict(instance: Model, exclude_fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """
-    Safely converts a model instance to a dictionary, excluding sensitive fields.
-    """
-    exclude_fields = exclude_fields or []
-    data = model_to_dict(instance)
-
-    for field in exclude_fields:
-        if field in data:
-            del data[field]
-
-    return data
-
+ALLOWED_MODELS = ['Reply', 'Category', 'Topic']
+ALLOWED_FILTER_PARAMS = ['topic__slug', 'category__slug', 'author_id']
+ALLOWED_ANNOTATIONS = ['author_name', 'replies']
 
 def index(request: HttpRequest) -> HttpResponse:
     """
@@ -126,61 +66,40 @@ def new_topic(request: HttpRequest) -> HttpResponse:
         form = NewTopicForm()
         return render(request, 'new_topic.html', {'categories': categories, 'form': form})
 
-
 @require_POST
 def load_objects(request: HttpRequest) -> JsonResponse:
     """
     Dynamically loads objects, supporting filtering, pagination, and annotations.
     """
-    page = int(request.POST.get('page', 1))
-    per_page = int(request.POST.get('per_page', 7))
+    page, per_page = validate_page_and_per_page(request)
+    if page is None or per_page is None:
+        return JsonResponse({'error': 'Invalid page or per_page'}, status=400)
+
     model_name = request.POST.get('model')
     format_function, format_args = get_format_function(request)
 
-    if not model_name or model_name not in ALLOWED_MODELS:
-        return JsonResponse({'error': 'Invalid or disallowed model'}, status=400)
+    model, error_response = get_model(model_name)
+    if error_response:
+        return error_response
 
-    try:
-        model = apps.get_model(app_label='forumapp', model_name=model_name)
-    except LookupError:
-        return JsonResponse({'error': f'Model {model_name} does not exist'}, status=400)
-
-    filter_params = {key: value for key, value in request.POST.items() if key not in ['page', 'per_page', 'model']}
+    filter_params = get_filter_params(request)
     filter_params = validate_filter_params(filter_params)
 
     annotations = validate_annotations(request.GET)
+    related_counts_request = request.GET.get('related_counts', '')
 
-    try:
-        if annotations:
-            objects = model.objects.filter(**filter_params).annotate(**annotations)
-        else:
-            objects = model.objects.filter(**filter_params)
-
-        if model_name == 'Category' and not request.user.is_authenticated:
-            objects = objects.exclude(slug='MyTopics')
-    except Exception as e:
-        return JsonResponse({'error': f'Error filtering objects: {str(e)}'}, status=400)
+    objects, annotations = fetch_objects(model, filter_params, annotations, related_counts_request, request)
+    if isinstance(objects, JsonResponse):
+        return objects
 
     paginator = Paginator(objects, per_page)
     page_objects = paginator.get_page(page)
 
-    objects_data = []
+    objects_data = serialize_objects(page_objects, annotations, related_counts_request, format_function, format_args)
 
-    for obj in page_objects:
-        obj_dict = safe_model_to_dict(obj, exclude_fields=['author_email', 'password'])
+    response_data = create_response_data(objects_data, page_objects, request)
 
-        if annotations:
-            add_annotated_fields_to_obj_attrs(obj_dict, obj, annotations)
-
-        if format_function:
-            format_function(obj_dict, obj, *format_args)
-
-        objects_data.append(obj_dict)
-
-    return JsonResponse({
-        'objects': objects_data,
-        'has_next': page_objects.has_next()
-    })
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -223,12 +142,13 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     category = get_object_or_404(Category, slug=slug)
     categories = Category.objects.all()
 
-    if category.name == 'My Topics':
-        topics = Topic.objects.filter(author=request.user)
-    else:
-        topics = category.topics.all()
+    user_id = ''
 
-    return render(request, 'category_detail.html', {'category': category, 'topics': topics, 'categories': categories})
+    if category.name == 'My Topics':
+        user_id = request.user.id
+
+
+    return render(request, 'category_detail.html', {'category': category, 'user_id': user_id, 'categories': categories, 'is_category_detail': True})
 
 
 def category_list(request: HttpRequest) -> HttpResponse:

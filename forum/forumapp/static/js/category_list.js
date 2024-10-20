@@ -1,5 +1,5 @@
 var page = 1;  // current page
-var per_page = 5;
+var per_page = 5; // objects per page
 var model = "Category";
 
 function loadCategories() {

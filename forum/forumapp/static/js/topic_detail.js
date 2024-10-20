@@ -136,6 +136,7 @@ function createReplyBox() {
 function loadReplies() {
     filters = {"topic__slug": slug};
     let body = `page=${page}&per_page=${per_page}&model=${model}`;
+    
     for (const [key, value] of Object.entries(filters)) {
         body += `&${key}=${value}`;
     }
